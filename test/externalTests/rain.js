@@ -9,6 +9,7 @@ module.exports = () => async (bot) => {
   // otherwise retain the short settling delay for an already-clear world.
   if (bot.isRaining) await once(bot, 'rain')
   else await bot.test.wait(1000)
+  assert.strictEqual(bot.isRaining, false)
   bot.test.sayEverywhere('/weather rain')
 
   await once(bot, 'rain')
