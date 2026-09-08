@@ -307,3 +307,20 @@ npm run mocha_test -- --grep '^mineflayer_external.*26\\.2v' test/externalTest.j
 結果為 `1016 passing (30m)`，沒有 failure、pending、timeout 或 loop。測試覆蓋按 resource name 去重後的全部 item-backed block matrix；對流體、作物、附著方塊、低光蘑菇、infested silverfish、kelp substrate、gravity/slow-tool 方塊均使用專項 fixture。長測結束時 Vanilla server 正常 disconnect、save world、stop，隨後的程序查詢沒有符合條件的 Node/Java server process。
 
 長測中確認並修正的場景污染／競態包括：三層流體清理、每 case 飛行與腳下支撐恢復、銀魚清除、固定 anchor 防止跌出 26.2 世界底界，以及 trial spawner/vault 的合法 75 秒挖掘上限。這證明 external runner 不會再因這些已知案例無限等待，但 Paper/Spigot、online-mode、fuzz、長時間 reconnect/resource leak 與效能 gate 仍未完成實證。
+
+## 2026-09-08 fork 同步與合併後驗證
+
+六個 private fork 均已將必要變更合併到本地 `master`，並推送到各自的 `origin/master`；沒有建立或推送 upstream PR：
+
+| repository | `origin/master` HEAD | upstream 同步結果 |
+| --- | --- | --- |
+| node-minecraft-protocol | `8e8e4c7` | 無 upstream-only commit |
+| prismarine-item | `2391920` | 無 upstream-only commit |
+| prismarine-physics | `4b8f466` | 無 upstream-only commit |
+| prismarine-chunk | `b4584b2` | 無 upstream-only commit |
+| minecraft-data | `cf3d291c` | 已合併 upstream master 更新 |
+| mineflayer | `74142b7e` | 已合併 upstream master 更新 |
+
+合併後 Mineflayer 26.2 Vanilla external smoke 為 `63 passing (2m)`；furnace 改用 26.2 的 `/data merge`、`cooking_time_spent`，useChests 改用 `/item replace`，兩者均已重跑通過。Mineflayer lint 與 26.2 pure/integration/cleanup 測試為 `13 passing`。所有測試 server 都正常 disconnect、save、stop，工作樹與六個 fork 的 `diff --check` 均乾淨。
+
+這次同步不改變前述限制：Paper/Spigot、online-mode、fuzz、長時間 reconnect/resource leak 與效能 gate 尚未取得完整實證，因此目前定案為「private fork 的 Vanilla 26.2 支援已整合並驗證」，不是 upstream/npm 線的完整支援聲明。

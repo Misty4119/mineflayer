@@ -352,3 +352,9 @@ baseline workload：
 `Phase 0 → Phase 1 → Phase 2 → Phase 3/4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10`
 
 Phase 3 與 Phase 4 可以在 Phase 2 schema 穩定後平行處理；Phase 8 與 Phase 9 必須建立在功能與測試基線穩定後，不提前用最佳化掩蓋 protocol/data correctness 問題。
+
+## 9. 2026-09-08 定案同步快照
+
+六個 fork 的本地 `master` 已完成 26.2 變更、上游更新合併與 `origin/master` 推送；工作樹乾淨，未建立 upstream PR。Mineflayer 合併後以官方 Vanilla 26.2 執行 external smoke，結果為 `63 passing (2m)`，並通過 lint 與 26.2 pure/integration/cleanup `13 passing`。
+
+本快照的定案範圍是 private fork 的 Vanilla 26.2；Paper/Spigot、online-mode、fuzz、長時間 reconnect/resource leak 與效能 gate 仍保留為後續驗證項，不在本次同步中宣稱完成。
