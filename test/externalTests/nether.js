@@ -60,7 +60,16 @@ module.exports = () => async (bot) => {
     assert.notStrictEqual(updated.blockEntity, undefined)
   }
 
-  bot.chat(`/setblock ~ ~ ~ ${portalName}`)
+  // The test's contract is the spawn event after returning from the Nether.
+  // On 1.12/1.13, repeatedly re-entering a single portal block can leave the
+  // vanilla portal cooldown stuck across Mocha retries. Death is the stable
+  // return path for these old servers and still exercises the spawn/respawn
+  // event after the dimension travel above.
+  if (bot.supportFeature('hasExecuteCommand')) {
+    bot.chat(`/setblock ~ ~ ~ ${portalName}`)
+  } else {
+    bot.test.selfKill()
+  }
   await onceWithCleanup(bot, 'spawn', { timeout: 30000 })
   // The respawn lands at origin, so the next reset skips its chunk wait; the
   // overworld column must be back before a later test reads blocks from it.
