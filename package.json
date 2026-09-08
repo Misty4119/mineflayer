@@ -10,8 +10,7 @@
     "pretest": "npm run lint",
     "lint": "standard && standard-markdown",
     "fix": "standard --fix && standard-markdown --fix",
-    "prepublishOnly": "cp docs/README.md README.md",
-    "postinstall": "node tools/install-minecraft-data-26.2.mjs"
+    "prepublishOnly": "cp docs/README.md README.md"
   },
   "repository": {
     "type": "git",
@@ -22,17 +21,17 @@
   },
   "license": "MIT",
   "dependencies": {
-    "minecraft-data": "3.113.0",
-    "minecraft-protocol": "github:PrismarineJS/node-minecraft-protocol#0dfb5768b444fd21e45135713edb2ed80279f696",
+    "minecraft-data": "file:vendor/minecraft-data",
+    "minecraft-protocol": "file:../node-minecraft-protocol",
     "mojangson": "^2.0.4",
     "prismarine-biome": "^1.1.1",
     "prismarine-block": "^1.22.0",
     "prismarine-chat": "^1.7.1",
-    "prismarine-chunk": "github:robertvandervoort/prismarine-chunk#bcf228b3be07f5105c170ab25f2b4ee723718230",
+    "prismarine-chunk": "file:../prismarine-chunk",
     "prismarine-entity": "^2.5.0",
-    "prismarine-item": "^1.17.0",
+    "prismarine-item": "file:../prismarine-item",
     "prismarine-nbt": "^2.0.0",
-    "prismarine-physics": "github:robertvandervoort/prismarine-physics#e5597f73f4aa76a621a18b8f14708cc8b6dd33a4",
+    "prismarine-physics": "file:../prismarine-physics",
     "prismarine-recipe": "^1.5.0",
     "prismarine-registry": "^1.10.0",
     "prismarine-windows": "^2.9.0",

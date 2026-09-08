@@ -57,6 +57,7 @@ describe('Minecraft 26.2 protocol adapters', function () {
   })
 
   it('sends player_loaded and the split attack/use_entity packets', async function () {
+    assert.match(server.sessionId, /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
     bot.attack({ id: 42 }, false)
     bot.useOn({ id: 43 })
     const lookAt = bot.lookAt

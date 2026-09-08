@@ -11562,12 +11562,15 @@
             }
           ]
         ],
-        "packet_spectate_entity": [
+        "packet_spectator_action": [
           "container",
           [
             {
               "name": "entityId",
-              "type": "varint"
+              "type": [
+                "option",
+                "varint"
+              ]
             }
           ]
         ],
@@ -11770,7 +11773,7 @@
                     "0x3b": "update_structure_block",
                     "0x3c": "set_test_block",
                     "0x3d": "update_sign",
-                    "0x3e": "spectate_entity",
+                    "0x3e": "spectator_action",
                     "0x3f": "arm_animation",
                     "0x40": "spectate",
                     "0x41": "test_instance_block_action",
@@ -11845,11 +11848,12 @@
                     "update_command_block": "packet_update_command_block",
                     "update_command_block_minecart": "packet_update_command_block_minecart",
                     "set_creative_slot": "packet_set_creative_slot",
+                    "set_game_rule": "packet_set_game_rule",
                     "update_jigsaw_block": "packet_update_jigsaw_block",
                     "update_structure_block": "packet_update_structure_block",
                     "set_test_block": "packet_set_test_block",
                     "update_sign": "packet_update_sign",
-                    "spectate_entity": "packet_spectate_entity",
+                    "spectator_action": "packet_spectator_action",
                     "arm_animation": "packet_arm_animation",
                     "spectate": "packet_spectate",
                     "test_instance_block_action": "packet_test_instance_block_action",

@@ -1,0 +1,14 @@
+{
+  "name": "minecraft-data",
+  "version": "3.116.0",
+  "private": true,
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "pc/26.2",
+    "provenance.json"
+  ],
+  "dependencies": {
+    "minecraft-data-base": "npm:minecraft-data@3.113.0"
+  }
+}

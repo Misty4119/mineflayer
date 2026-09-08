@@ -73,9 +73,10 @@ module.exports = () => async (bot) => {
 
 function makeListener (wantedMessage) {
   return (message) => {
-    if (!message.startsWith(wantedMessage)) {
-      assert.fail(`Unexpected message: ${message}, wanted ${wantedMessage}`) // error
-    }
-    return true // stop listening
+    // Modern signed chat can deliver other valid messages from the same
+    // child without the legacy chat event/prefix. Keep listening until the
+    // command's response arrives instead of turning an unrelated message
+    // into a failed assertion.
+    return message.startsWith(wantedMessage)
   }
 }

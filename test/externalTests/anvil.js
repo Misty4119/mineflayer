@@ -2,23 +2,32 @@ const assert = require('assert')
 const { once } = require('../../lib/promise_utils')
 
 module.exports = () => {
+  function assertEnchantments (actual, expected) {
+    const byName = (a, b) => a.name.localeCompare(b.name)
+    assert.deepStrictEqual([...actual].sort(byName), [...expected].sort(byName))
+  }
+
   async function runTest (bot, testFunction) {
     const Item = require('prismarine-item')(bot.registry)
     const renameCost = () => bot.registry.isNewerOrEqualTo('1.8.9') ? 0 : 1 // weird quirk of anvils
-    const renameName = (name) => bot.registry.isOlderThan('1.13.2') ? name : JSON.stringify({ text: name }) // weird quirk of anvils
+    const renameName = (name) => bot.registry.isOlderThan('1.13.2') || bot.supportFeature('customNameComponentIsPlainText')
+      ? name
+      : JSON.stringify({ text: name }) // weird quirk of anvils
     await bot.test.becomeCreative()
     await bot.test.setInventorySlot(36, new Item(bot.registry.itemsByName.anvil.id, 1))
     await bot.test.becomeSurvival()
     await bot.test.placeBlock(36, bot.entity.position.offset(1, 0, 0))
 
-    if (bot.registry.isNewerOrEqualTo('1.13')) bot.chat(`/xp set ${bot.username} 999 levels`)
-    else {
+    if (bot.registry.isNewerOrEqualTo('1.13')) {
+      const xpPromise = bot.experience.level === 999 ? null : once(bot, 'experience')
+      bot.chat(`/xp set ${bot.username} 999 levels`)
+      if (xpPromise) await xpPromise
+    } else {
       bot.chat(`/xp -2147483648L ${bot.username}`)
       await once(bot, 'experience')
       bot.chat(`/xp 999L ${bot.username}`)
+      await once(bot, 'experience')
     }
-
-    await once(bot, 'experience')
 
     const b = bot.findBlock({ matching: bot.registry.blocksByName.anvil.id }) // find anvil before tests so all tests can use it
 
@@ -82,7 +91,7 @@ module.exports = () => {
     // test result
     assert.strictEqual(bot.experience.level, 996)
     assert.strictEqual(anvil.slots[3].repairCost, 1)
-    assert.deepStrictEqual(anvil.slots[3].enchants, [{ name: 'sharpness', lvl: 5 }, { name: 'unbreaking', lvl: 3 }])
+    assertEnchantments(anvil.slots[3].enchants, [{ name: 'sharpness', lvl: 5 }, { name: 'unbreaking', lvl: 3 }])
     anvil.close()
     await bot.test.wait(1000)
   })
@@ -126,7 +135,7 @@ module.exports = () => {
     // test result
     assert.strictEqual(bot.experience.level, 995)
     assert.strictEqual(anvil.slots[3].repairCost, 1)
-    assert.deepStrictEqual(anvil.slots[3].enchants, [{ name: 'sharpness', lvl: 5 }, { name: 'unbreaking', lvl: 3 }])
+    assertEnchantments(anvil.slots[3].enchants, [{ name: 'sharpness', lvl: 5 }, { name: 'unbreaking', lvl: 3 }])
     assert.strictEqual(anvil.slots[3].customName, renameName('lol'))
     anvil.close()
     await bot.test.wait(1000)

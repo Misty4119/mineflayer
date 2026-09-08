@@ -52,10 +52,31 @@ function inject (bot, wrap) {
     await p // await getting the item
   }
   // setting relative to true makes x, y, & z relative using ~
-  bot.test.setBlock = async ({ x = 0, y = 0, z = 0, relative, blockName }) => {
+  bot.test.setBlock = async ({ x = 0, y = 0, z = 0, relative, blockName, force = false }) => {
     const { x: _x, y: _y, z: _z } = relative ? bot.entity.position.floored().offset(x, y, z) : { x, y, z }
     const block = bot.blockAt(new Vec3(_x, _y, _z))
-    if (block.name === blockName) {
+    if (!force && block.name === blockName) {
+      return
+    }
+    if (force) {
+      const marker = `set-block-done-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+      const markerPromise = onceWithCleanup(bot, 'messagestr', {
+        timeout: 5000,
+        checkCondition: message => message.includes(marker)
+      })
+      const prefix = relative ? '~' : ''
+      bot.chat(`/setblock ${prefix}${x} ${prefix}${y} ${prefix}${z} ${blockName}`)
+      bot.chat(marker)
+      await markerPromise
+      // The command acknowledgement can arrive before the block update
+      // packet. Do not let callers observe stale world state after a forced
+      // setblock, especially for block-entity and fluid fixtures.
+      if (bot.blockAt(new Vec3(_x, _y, _z))?.name !== blockName) {
+        await onceWithCleanup(bot, `blockUpdate:(${_x}, ${_y}, ${_z})`, {
+          timeout: 5000,
+          checkCondition: (_oldBlock, newBlock) => newBlock?.name === blockName
+        })
+      }
       return
     }
     const p = once(bot.world, `blockUpdate:(${_x}, ${_y}, ${_z})`)
@@ -221,10 +242,30 @@ function inject (bot, wrap) {
   }
 
   async function tellAndListen (to, what, listen) {
-    const chatMessagePromise = onceWithCleanup(bot, 'chat', {
-      timeout,
-      checkCondition: (username, message) => username === to && listen(message)
-    })
+    // Since 1.19, signed player chat is not required to contain the legacy
+    // `<username> message` prefix.  26.2 uses that legal modern form for
+    // some child-bot messages, so the deprecated `chat` pattern can never
+    // emit them.  Match the authoritative sender UUID on `messagestr`
+    // instead, while retaining the legacy path for older protocol versions.
+    const usesModernChat = bot.supportFeature('clientsideChatFormatting')
+    const modernSenderPrefix = new RegExp(`^<${to.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}>\\s*`)
+    const chatMessagePromise = usesModernChat
+      ? onceWithCleanup(bot, 'messagestr', {
+        timeout,
+        checkCondition: (message, position, originalMessage, sender) => {
+          if (position !== 'chat') return false
+          const targetUuid = bot.players[to]?.uuid
+          const senderUuid = typeof sender === 'string' ? sender : sender?.uuid
+          if (targetUuid && senderUuid && targetUuid !== senderUuid) return false
+          const normalizedMessage = message.replace(modernSenderPrefix, '')
+          const matches = listen(normalizedMessage)
+          return matches
+        }
+      })
+      : onceWithCleanup(bot, 'chat', {
+        timeout,
+        checkCondition: (username, message) => username === to && listen(message)
+      })
 
     bot.chat(what)
 
@@ -256,6 +297,7 @@ function inject (bot, wrap) {
       const targetPos = new Vec3(50, bot.test.groundY, 0)
       while (!bot.players[childBotName]?.entity ||
              bot.players[childBotName].entity.position.distanceTo(targetPos) > 5) {
+        if (abort.signal.aborted) throw abort.signal.reason
         await sleep(100)
       }
       bot.chat('loaded')

@@ -10,13 +10,58 @@ const path = require('path')
 const { getPort } = require('./common/util')
 const trace = require('./common/trace')
 const { once } = require('../lib/promise_utils')
+const { cleanupExternalTest, forceKillProcessTree } = require('./common/externalTestCleanup')
 
 // set this to false if you want to test without starting a server automatically
 const START_THE_SERVER = true
 // if you want to have time to look what's happening increase this (milliseconds)
 const TEST_TIMEOUT_MS = 90000
 
-const excludedTests = ['digEverything', 'anvil', 'placeEntity']
+// The block matrix creates one test for almost every diggable block. Keep it
+// out of the normal external run: 26.2 expands it to more than 1,000 cases
+// and can take tens of minutes. Run it explicitly with
+// MINEFLAYER_RUN_EXHAUSTIVE_BLOCK_TESTS=1.
+const runExhaustiveBlockTests = /^(1|true|yes)$/i.test(process.env.MINEFLAYER_RUN_EXHAUSTIVE_BLOCK_TESTS ?? '')
+const excludedTests = runExhaustiveBlockTests ? [] : ['digEverything']
+
+// Mocha's normal exit path runs the after hook, but Ctrl+C and a hard test
+// timeout can bypass it. Keep every wrapper reachable so interrupted runs do
+// not leave a Java server (or its Windows child process tree) behind.
+const activeExternalRuns = new Set()
+let signalCleanupPromise
+
+async function cleanupActiveExternalRuns () {
+  const failures = []
+  await Promise.all([...activeExternalRuns].map(async (activeRun) => {
+    const { wrap, getBot } = activeRun
+    try {
+      // Do not remove the test world while handling a signal; preserving it
+      // makes an interrupted run diagnosable.
+      await cleanupExternalTest({ wrap, getBot, deleteServerData: false })
+    } catch (err) {
+      failures.push(err)
+    } finally {
+      activeExternalRuns.delete(activeRun)
+    }
+  }))
+  if (failures.length > 0) throw failures[0]
+}
+
+function handleExternalSignal (exitCode) {
+  if (signalCleanupPromise) return
+  signalCleanupPromise = cleanupActiveExternalRuns()
+    .catch(err => console.error('external test cleanup failed:', err))
+    .finally(() => {
+      process.exitCode = exitCode
+      process.exit(exitCode)
+    })
+}
+
+process.prependListener('SIGINT', () => handleExternalSignal(130))
+process.prependListener('SIGTERM', () => handleExternalSignal(143))
+process.on('exit', () => {
+  for (const { wrap } of activeExternalRuns) forceKillProcessTree(wrap.mcServer)
+})
 
 const propOverrides = {
   'level-type': 'FLAT',
@@ -67,6 +112,8 @@ for (const supportedVersion of mineflayer.testedVersions) {
 
   describe(`mineflayer_external ${supportedVersion}v`, function () {
     let bot
+    const activeRun = { wrap, getBot: () => bot }
+    activeExternalRuns.add(activeRun)
     this.timeout(10 * 60 * 1000)
     before(async function () {
       PORT = await getPort()
@@ -143,26 +190,34 @@ for (const supportedVersion of mineflayer.testedVersions) {
       } else begin()
     })
 
-    after((done) => {
-      if (bot) bot.quit()
-      wrap.stopServer((err) => {
-        if (err) {
-          console.log(err)
-        }
-        wrap.deleteServerData((err) => {
-          if (err) {
-            console.log(err)
-          }
-          done(err)
-        })
-      })
+    after(async function () {
+      try {
+        await cleanupExternalTest({ wrap, getBot: () => bot })
+      } catch (err) {
+        console.error('external test cleanup failed:', err)
+        throw err
+      } finally {
+        // Do not retain a stopped child process in the exit-time kill set: a
+        // later process could otherwise reuse the same PID on Windows.
+        activeExternalRuns.delete(activeRun)
+      }
     })
 
+    let suiteAborted = false
     // mocha doesn't cancel a test it kills at its timeout, it just stops waiting
     // for it: the attempt's example keeps running and its listeners keep
     // reacting to the shared bot, so the next test (or retry) would run the
     // example twice at once. This hook runs after every attempt, retries too.
-    afterEach(() => bot?.test?.abortRunningExample?.())
+    afterEach(function () {
+      bot?.test?.abortRunningExample?.()
+      if (this.currentTest?.state === 'failed') {
+        // A timed-out test is no longer awaited by Mocha, but its async body
+        // can otherwise continue issuing packets against the shared bot.
+        // Disconnect it and make teardown the only remaining activity.
+        try { bot?.end('external test failed') } catch (err) { /* already closed */ }
+        suiteAborted = true
+      }
+    })
 
     async function reconnectBot () {
       console.log('  Bot disconnected, reconnecting...')
@@ -185,6 +240,7 @@ for (const supportedVersion of mineflayer.testedVersions) {
 
     const externalTestsFolder = path.resolve(__dirname, './externalTests')
     let distinctFailures = 0
+    let exhaustiveBlockStateReady = false
     // Sort test files so example tests (which spawn child processes and can
     // crash/disconnect the bot) run last, limiting their blast radius.
     const dangerousTests = ['exampleBee', 'exampleDigger', 'exampleInventory']
@@ -203,18 +259,25 @@ for (const supportedVersion of mineflayer.testedVersions) {
         const runTest = (testName, testFunction) => {
           return function (done) {
             this.timeout(TEST_TIMEOUT_MS)
+            if (suiteAborted) {
+              this.skip()
+              return
+            }
             // Disable retries if too many different tests have already failed
             // on their first attempt (indicates a systemic issue, not flakiness)
             if (distinctFailures >= 3) this.retries(0)
             if (this.test._currentRetry > 0) {
               console.log(`  [retry ${this.test._currentRetry}] ${testName}`)
             }
+            const isBatchableExhaustiveBlockTest = runExhaustiveBlockTests && test === 'digEverything'
+            const resetState = !isBatchableExhaustiveBlockTest || !exhaustiveBlockStateReady
             // Reconnect if bot got disconnected by a previous test
             const reconnect = !bot.entity
               ? reconnectBot()
               : Promise.resolve()
-            reconnect.then(() => bot.test.resetState())
+            reconnect.then(() => resetState ? bot.test.resetState() : undefined)
               .then(() => {
+                if (isBatchableExhaustiveBlockTest) exhaustiveBlockStateReady = true
                 bot.test.sayEverywhere(`### Starting ${testName}`)
                 return testFunction(bot, done)
               })

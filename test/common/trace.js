@@ -39,7 +39,9 @@ if (!isMainThread) {
     pending = new Int32Array(new SharedArrayBuffer(4))
     worker = new Worker(__filename, { workerData: { file, pending } })
     worker.unref()
-    console.log(`trace: ${file}`)
+    // Keep machine-readable stdout available to callers that use the trace
+    // helper in a child process; diagnostics belong on stderr.
+    console.error(`trace: ${file}`)
     process.on('exit', () => {
       let n
       while ((n = Atomics.load(pending, 0)) > 0) Atomics.wait(pending, 0, n, 10000)

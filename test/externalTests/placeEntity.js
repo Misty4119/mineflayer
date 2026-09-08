@@ -45,10 +45,12 @@ module.exports = (version) => {
     }
 
     await placeBlocksForTest('water')
-    await bot.test.awaitItemReceived(`/give ${bot.username} ${bot.registry.oak_boat ? 'oak_boat' : 'boat'}`)
+    await bot.test.awaitItemReceived(`/give ${bot.username} ${bot.registry.itemsByName.oak_boat ? 'oak_boat' : 'boat'}`)
     const boat = await bot.placeEntity(bot.blockAt(bot.entity.position.offset(0, -1, -2)), new Vec3(0, -1, 0))
     assert(boat !== null)
-    const name = bot.supportFeature('entityNameUpperCaseNoUnderscore') ? 'Boat' : 'boat'
+    const name = bot.registry.entitiesByName.oak_boat
+      ? 'oak_boat'
+      : bot.supportFeature('entityNameUpperCaseNoUnderscore') ? 'Boat' : 'boat'
     const entity = bot.nearestEntity(o => o.name === name)
     assert(entity?.name === name)
     await placeBlocksForTest('air')

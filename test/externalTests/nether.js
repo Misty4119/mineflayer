@@ -28,10 +28,11 @@ module.exports = () => async (bot) => {
   // Poll until the block below is loaded and non-air before placing.
   // On slow CI, chunks may report as loaded before block data is ready.
   let lowerBlock = bot.blockAt(bot.entity.position.offset(0, -1, 0))
-  while (!lowerBlock || lowerBlock.name === 'air') {
+  for (let attempts = 0; attempts < 50 && (!lowerBlock || lowerBlock.name === 'air'); attempts++) {
     await sleep(100)
     lowerBlock = bot.blockAt(bot.entity.position.offset(0, -1, 0))
   }
+  assert.ok(lowerBlock && lowerBlock.name !== 'air', 'solid block below player was not loaded')
 
   await bot.lookAt(lowerBlock.position, true)
   await bot.test.setInventorySlot(36, new Item(signItem.id, 1, 0))

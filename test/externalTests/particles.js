@@ -1,10 +1,12 @@
 const assert = require('assert')
+const { onceWithCleanup } = require('../../lib/promise_utils')
 
 module.exports = () => async (bot) => {
   const particleData = bot.registry.particles[0]
 
-  return new Promise((resolve, reject) => {
-    function onParticleEvent (particle) {
+  const particle = onceWithCleanup(bot, 'particle', {
+    timeout: 5000,
+    checkCondition: particle => {
       if (typeof particle.id === 'number') {
         assert.strictEqual(particle.id, particleData.id)
       } else {
@@ -20,12 +22,10 @@ module.exports = () => async (bot) => {
       assert.strictEqual(particle.count, 100)
       assert.strictEqual(particle.movementSpeed, 0.5)
       assert.strictEqual(particle.longDistanceRender, true)
-
-      resolve()
+      return true
     }
-
-    bot.on('particle', onParticleEvent)
-
-    bot.chat(`/particle ${particleData.name} ~ ~ ~ 5 5 5 0.5 100 force`)
   })
+
+  bot.chat(`/particle ${particleData.name} ~ ~ ~ 5 5 5 0.5 100 force`)
+  await particle
 }
