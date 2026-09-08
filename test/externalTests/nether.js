@@ -17,7 +17,15 @@ module.exports = () => async (bot) => {
   // each retry must use a fresh location or it is guaranteed to time out.
   bot.test.netherAttempts ??= 0
   const attempt = ++bot.test.netherAttempts
-  await bot.test.teleport(new Vec3((attempt - 1) * 4, bot.test.groundY, 0))
+  const returnsByDeath = !bot.supportFeature('hasExecuteCommand')
+  const portalPosition = new Vec3((attempt - 1) * 4, bot.test.groundY, 0)
+  await bot.test.teleport(portalPosition)
+  if (returnsByDeath) {
+    // Old servers respawn a Nether death at the player's spawn point. Keep it
+    // away from the entry portal or the fresh player immediately re-enters it
+    // while the test is handing control back to the next case.
+    bot.chat(`/spawnpoint ${bot.username} 12 ${bot.test.groundY} 0`)
+  }
   bot.chat(`/setblock ~ ~ ~ ${portalName}`)
   await onceWithCleanup(bot, 'spawn', { timeout: 30000 })
   bot.test.sayEverywhere('/tp 0 128 0')
@@ -65,13 +73,37 @@ module.exports = () => async (bot) => {
   // vanilla portal cooldown stuck across Mocha retries. Death is the stable
   // return path for these old servers and still exercises the spawn/respawn
   // event after the dimension travel above.
-  if (bot.supportFeature('hasExecuteCommand')) {
+  if (!returnsByDeath) {
     bot.chat(`/setblock ~ ~ ~ ${portalName}`)
   } else {
     bot.test.selfKill()
   }
   await onceWithCleanup(bot, 'spawn', { timeout: 30000 })
-  // The respawn lands at origin, so the next reset skips its chunk wait; the
-  // overworld column must be back before a later test reads blocks from it.
+  if (returnsByDeath) {
+    // Remove the entry block before the next test resets the bot to origin. A
+    // death can respawn away from it but the reset teleport may still land in
+    // the portal before vanilla's cooldown expires.
+    //
+    // Some 1.9/1.10 servers acknowledge these commands without sending a
+    // block update when the server-side block is already air. Toggle through
+    // bedrock and unload the old chunk so the next load must contain air.
+    const marker = `clear-nether-done-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+    const markerPromise = onceWithCleanup(bot, 'messagestr', {
+      timeout: 5000,
+      checkCondition: message => message.includes(marker)
+    })
+    const clearPosition = `${portalPosition.x} ${portalPosition.y} ${portalPosition.z}`
+    bot.chat(`/setblock ${clearPosition} bedrock`)
+    bot.chat(`/setblock ${clearPosition} air`)
+    bot.chat(marker)
+    await markerPromise
+
+    // 1.8.8 is too slow to populate the distant chunk set within the helper
+    // timeout; its direct block update is sufficient without this reload.
+    if (bot.version !== '1.8.8') {
+      await bot.test.teleport(new Vec3(portalPosition.x + 256, bot.test.groundY, 0))
+      await bot.waitForChunksToLoad()
+    }
+  }
   await bot.waitForChunksToLoad()
 }
