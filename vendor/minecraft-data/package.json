@@ -9,6 +9,6 @@
     "provenance.json"
   ],
   "dependencies": {
-    "minecraft-data-base": "npm:minecraft-data@3.113.0"
+    "minecraft-data-base": "npm:minecraft-data@3.116.0"
   }
 }
