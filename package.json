@@ -29,7 +29,7 @@
     "prismarine-chat": "^1.7.1",
     "prismarine-chunk": "git+https://github.com/Misty4119/prismarine-chunk.git#b4584b2",
     "prismarine-entity": "^2.5.0",
-    "prismarine-item": "git+https://github.com/Misty4119/prismarine-item.git#2391920",
+    "prismarine-item": "git+https://github.com/Misty4119/prismarine-item.git#6badc41",
     "prismarine-nbt": "^2.0.0",
     "prismarine-physics": "git+https://github.com/Misty4119/prismarine-physics.git#4b8f466",
     "prismarine-recipe": "^1.5.0",

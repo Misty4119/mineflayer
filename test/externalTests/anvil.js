@@ -10,9 +10,11 @@ module.exports = () => {
   async function runTest (bot, testFunction) {
     const Item = require('prismarine-item')(bot.registry)
     const renameCost = () => bot.registry.isNewerOrEqualTo('1.8.9') ? 0 : 1 // weird quirk of anvils
-    const renameName = (name) => bot.registry.isOlderThan('1.13.2') || bot.supportFeature('customNameComponentIsPlainText')
-      ? name
-      : JSON.stringify({ text: name }) // weird quirk of anvils
+    const renameName = (name) => {
+      if (bot.registry.isOlderThan('1.13.2') || bot.supportFeature('itemsWithComponents') || bot.supportFeature('customNameComponentIsPlainText')) return name
+      if (bot.registry.isNewerOrEqualTo('1.20.4') && bot.registry.isOlderThan('1.20.5')) return JSON.stringify(name)
+      return JSON.stringify({ text: name }) // weird quirk of anvils
+    }
     await bot.test.becomeCreative()
     await bot.test.setInventorySlot(36, new Item(bot.registry.itemsByName.anvil.id, 1))
     await bot.test.becomeSurvival()
