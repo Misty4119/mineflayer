@@ -42,7 +42,10 @@ function stopExternalServer (wrap, { timeout = DEFAULT_STOP_TIMEOUT, kill = forc
         finish(err)
         return
       }
-      finish(new Error(`external server pid ${server.pid} timed out while stopping`))
+      // A slow Java shutdown is still a successful cleanup once the process
+      // tree has been force-killed. Reporting the timeout as a test failure
+      // made otherwise passing CI runs fail in their after hook.
+      finish()
     }, timeout)
 
     try {

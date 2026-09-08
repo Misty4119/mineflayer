@@ -11,13 +11,25 @@ describe('external test cleanup', function () {
       stopServer: () => {}
     }
 
+    await stopExternalServer(wrap, {
+      timeout: 10,
+      kill: () => { killed++ }
+    })
+    assert.strictEqual(killed, 1)
+  })
+
+  it('reports a force-kill failure', async function () {
+    const wrap = {
+      mcServer: { pid: 1234 },
+      stopServer: () => {}
+    }
+
     await assert.rejects(
       stopExternalServer(wrap, {
         timeout: 10,
-        kill: () => { killed++ }
+        kill: () => { throw new Error('kill failed') }
       }),
-      /timed out/
+      /kill failed/
     )
-    assert.strictEqual(killed, 1)
   })
 })
