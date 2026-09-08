@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Use Node.js 24.x
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
         node-version: 24
     - run: npm ci && npm run lint
@@ -28,9 +28,9 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Use Node.js 24.x
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
         node-version: 24
     - id: set-matrix
@@ -54,13 +54,13 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use Node.js 24.x
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Setup Java JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 25
@@ -70,7 +70,7 @@ jobs:
       # Per-test durations from the last master run of this version group, so a PR gets a
       # comment listing tests it made more than 1.5x slower (test/common/compareDurations.js).
       - name: Restore duration baseline
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: durations
           key: durations-${{ strategy.job-index }}-${{ github.sha }}
@@ -132,21 +132,21 @@ jobs:
       # duration-comment.yml from this artifact instead of from here.
       - name: Upload slower tests for the PR comment
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: slower-${{ strategy.job-index }}
           path: slower
 
       - name: Save duration baseline
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: durations
           key: durations-${{ strategy.job-index }}-${{ github.sha }}
 
       - name: Upload failed versions' logs and traces
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: failing-versions-${{ strategy.job-index }}
           path: artifacts/
