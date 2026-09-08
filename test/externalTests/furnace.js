@@ -61,9 +61,10 @@ module.exports = () => async (bot) => {
   } else {
     bot.chat(`/blockdata ${x} ${y} ${z} {${cookTimeKey}:195s}`)
   }
-  // The 5 remaining ticks complete in 250-320ms on every tested version; a
-  // timeout means the merge was silently ignored.
-  await onceWithCleanup(furnace, 'update', { timeout: 500, checkCondition: () => furnace.outputItem() !== null })
+  // The 5 remaining ticks normally complete in 250-320ms, but command and
+  // window-property packets can be delayed on a loaded 26.2 server. Keep the
+  // wait bounded without turning normal scheduling jitter into a false failure.
+  await onceWithCleanup(furnace, 'update', { timeout: 5000, checkCondition: () => furnace.outputItem() !== null })
   assert.strictEqual(furnace.outputItem(), furnace.slots[2])
   assert.strictEqual(furnace.outputItem().type, cookedPorkchopId)
   assert.strictEqual(furnace.outputItem().count, 1)

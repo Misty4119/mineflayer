@@ -75,6 +75,9 @@ addVersionFeature('useEntityUsesSecondaryAction', 'the 26.2 use_entity packet na
 addVersionFeature('setCursorItemPacket', 'server sends authoritative cursor contents in set_cursor_item')
 addVersionFeature('customNameComponentIsPlainText', 'the custom_name item component is returned as a plain NBT string')
 addVersionFeature('loginSuccessIncludesSessionId', 'login success includes the server session UUID')
+addVersionFeature('hasDataCommand', '26.2 block entity NBT is edited with /data merge block')
+addVersionFeature('furnaceNbtUsesSnakeCase', '26.2 furnace block entity NBT uses cooking_time_spent')
+addVersionFeature('hasItemCommand', '26.2 uses /item replace instead of /replaceitem')
 if (!features.some(feature => feature.name === 'fishingBiteDelayMaxTicks')) {
   features.push({
     name: 'fishingBiteDelayMaxTicks',
