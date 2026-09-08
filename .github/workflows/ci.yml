@@ -82,15 +82,12 @@ jobs:
       - name: Start Tests
         run: |
           exit_code=0
-          pids=""
           for v in ${{ matrix.versions }}; do
             # TRACE is cheap (<1% runtime) and only written by the harness bot,
-            # so always record a packet trace for post-mortem analysis.
-            TRACE="trace-${v}.jsonl" DURATIONS="durations/durations-${v}.json" npm run mocha_test -- --retries 3 -g "${v}v" > "test-${v}.log" 2>&1 &
-            pids="$pids $!"
-          done
-          for pid in $pids; do
-            wait $pid || exit_code=$?
+            # so always record a packet trace for post-mortem analysis. Run one
+            # version at a time: four Java servers competing for one runner's
+            # CPU/RAM made timing-sensitive protocol tests flaky.
+            TRACE="trace-${v}.jsonl" DURATIONS="durations/durations-${v}.json" npm run mocha_test -- --retries 3 -g "${v}v" > "test-${v}.log" 2>&1 || exit_code=$?
           done
           # Print passing versions first, then failing versions last
           for v in ${{ matrix.versions }}; do
