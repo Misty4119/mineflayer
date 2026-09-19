@@ -7,7 +7,8 @@
     "index.js",
     "pc/26.2",
     "pc/26.3",
-    "provenance.json"
+    "provenance.json",
+    "provenance-26.3.json"
   ],
   "dependencies": {
     "minecraft-data-base": "npm:minecraft-data@3.116.0"

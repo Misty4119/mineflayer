@@ -1,0 +1,12 @@
+{
+  "minecraftVersion": "26.3",
+  "protocolVersion": 777,
+  "dataVersion": 5023,
+  "sourceRepository": "C:/Users/margo/IdeaProjects/minecraft-data",
+  "sourceBranch": "codex/minecraft-26-3",
+  "sourceCommit": "0c147255ddc97f731bab3c903600a2143e1aeaaf",
+  "generator": "net.minecraft.data.Main --reports",
+  "serverJar": "server_jars/minecraft_server.26.3.jar",
+  "serverJarSha256": "D052F14D7A173734FBA553711E5B570162E2F2A313267EE31A21B975A679BE64",
+  "generatedAt": "2026-09-19"
+}
