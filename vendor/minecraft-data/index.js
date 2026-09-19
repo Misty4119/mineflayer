@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const overlayVersion = '26.2'
+const overlayVersions = ['26.2', '26.3']
 const overlayFiles = [
   'attributes',
   'biomes',
@@ -26,46 +26,57 @@ const overlayFiles = [
 
 const basePackageRoot = path.dirname(require.resolve('minecraft-data-base/package.json'))
 const baseData = require(path.join(basePackageRoot, 'data.js'))
-const sourceRoot = path.join(__dirname, 'pc', overlayVersion)
-const inherited = baseData.pc['26.1']
+for (const overlayVersion of overlayVersions) {
+  const sourceRoot = path.join(__dirname, 'pc', overlayVersion)
+  const inherited = baseData.pc[overlayVersion === '26.2' ? '26.1' : '26.2']
+  if (!inherited) throw new Error(`minecraft-data ${overlayVersion === '26.2' ? '26.1' : '26.2'} is required for the ${overlayVersion} package`)
 
-if (!inherited) throw new Error('minecraft-data 26.1 is required for the 26.2 package')
-
-const data262 = { ...inherited }
-for (const file of overlayFiles) {
-  const source = path.join(sourceRoot, `${file}.json`)
-  if (!fs.existsSync(source)) throw new Error(`Missing bundled Minecraft 26.2 data: ${source}`)
-  data262[file] = require(source)
+  const data = { ...inherited }
+  for (const file of overlayFiles) {
+    const source = path.join(sourceRoot, `${file}.json`)
+    if (!fs.existsSync(source)) throw new Error(`Missing bundled Minecraft ${overlayVersion} data: ${source}`)
+    data[file] = require(source)
+  }
+  baseData.pc[overlayVersion] = data
 }
-baseData.pc[overlayVersion] = data262
 
+const latestOverlayVersion = overlayVersions.at(-1)
+const sourceRoot = path.join(__dirname, 'pc', latestOverlayVersion)
 const version = require(path.join(sourceRoot, 'version.json'))
 const protocolVersionsFile = path.join(basePackageRoot, 'minecraft-data', 'data', 'pc', 'common', 'protocolVersions.json')
 const protocolVersions = require(protocolVersionsFile)
-if (!protocolVersions.some(entry => entry.minecraftVersion === overlayVersion && entry.releaseType === 'release')) {
-  protocolVersions.unshift({
-    minecraftVersion: overlayVersion,
-    version: version.version,
-    dataVersion: 4903,
-    usesNetty: true,
-    majorVersion: overlayVersion,
-    releaseType: 'release'
-  })
+for (const overlayVersion of overlayVersions) {
+  const overlaySourceRoot = path.join(__dirname, 'pc', overlayVersion)
+  const overlayVersionData = require(path.join(overlaySourceRoot, 'version.json'))
+  if (!protocolVersions.some(entry => entry.minecraftVersion === overlayVersion && entry.releaseType === 'release')) {
+    protocolVersions.unshift({
+      minecraftVersion: overlayVersion,
+      version: overlayVersionData.version,
+      dataVersion: overlayVersion === '26.2' ? 4903 : 5023,
+      usesNetty: true,
+      majorVersion: overlayVersion,
+      releaseType: 'release'
+    })
+  }
 }
 
 const supportedVersionsFile = path.join(basePackageRoot, 'minecraft-data', 'data', 'pc', 'common', 'versions.json')
 const supportedVersions = require(supportedVersionsFile)
-if (!supportedVersions.includes(overlayVersion)) supportedVersions.push(overlayVersion)
+for (const overlayVersion of overlayVersions) {
+  if (!supportedVersions.includes(overlayVersion)) supportedVersions.push(overlayVersion)
+}
 
 const featuresFile = path.join(basePackageRoot, 'minecraft-data', 'data', 'pc', 'common', 'features.json')
 const features = require(featuresFile)
 const addVersionFeature = (name, description) => {
   const feature = features.find(entry => entry.name === name)
   if (feature) {
-    if (feature.versions && !feature.versions.includes(overlayVersion)) feature.versions.push(overlayVersion)
+    for (const overlayVersion of overlayVersions) {
+      if (feature.versions && !feature.versions.includes(overlayVersion)) feature.versions.push(overlayVersion)
+    }
     return
   }
-  features.push({ name, description, versions: [overlayVersion, overlayVersion] })
+  features.push({ name, description, versions: [...overlayVersions] })
 }
 
 addVersionFeature('sendsPlayerLoadedPacket', 'client sends a player_loaded packet after loading terrain or respawning')
@@ -82,7 +93,7 @@ if (!features.some(feature => feature.name === 'fishingBiteDelayMaxTicks')) {
   features.push({
     name: 'fishingBiteDelayMaxTicks',
     description: 'inclusive upper bound of the random tick wait rolled before a fishing hook bites',
-    values: [{ value: 600, versions: [overlayVersion, overlayVersion] }]
+    values: [{ value: 600, versions: [...overlayVersions] }]
   })
 }
 

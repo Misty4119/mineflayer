@@ -17,7 +17,7 @@ First time using Node.js? You may want to start with the [tutorial](tutorial.md)
 
 ## Features
 
- * Supports Minecraft 1.8 to 26.2 (1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.20, 1.21, 1.21.9, 1.21.11, 26.1, 26.2) <!--version-->
+ * Supports Minecraft 1.8 to 26.3 (1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.20, 1.21, 1.21.9, 1.21.11, 26.1, 26.2, 26.3) <!--version-->
  * Entity knowledge and tracking.
  * Block knowledge. You can query the world around you. Milliseconds to find any block.
  * Physics and movement - handle all bounding boxes
@@ -54,6 +54,7 @@ npm update
 | [FAQ.md](FAQ.md) | Got a question ? go there first |
 | **[api.md](api.md)** <br/>[unstable_api.md](unstable_api.md) | The full API reference |
 | [history.md](history.md) | The changelog for mineflayer |
+| [Minecraft 26.3 research](minecraft-26.3-research.md) | Protocol, data, validation, and compatibility notes for 26.3 |
 | [examples/](https://github.com/PrismarineJS/mineflayer/tree/master/examples) | Checkout all the mineflayer examples |
 
 

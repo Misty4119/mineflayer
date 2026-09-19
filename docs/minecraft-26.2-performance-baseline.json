@@ -1,0 +1,50 @@
+{
+  "purpose": "Reference run for comparing the existing 26.2 protocol and chunk hot paths after the 26.3 support changes.",
+  "environment": {
+    "os": "Windows 10.0.26100 x64",
+    "node": "v24.19.0",
+    "commit": "75f8a5cf632e347241fe71502861a49aa6a052e0",
+    "version": "26.2",
+    "timestampUtc": "2026-09-19"
+  },
+  "method": {
+    "command": "npm run perf:baseline -- 26.2",
+    "warmupBatches": 16,
+    "measuredBatches": 100,
+    "operationsPerBatch": 256,
+    "processRuns": 3,
+    "regressionRule": "Compare medians from repeated runs on this same environment. Investigate a repeatable regression greater than 10% in p95 latency or peak RSS."
+  },
+  "median": {
+    "peakRssBytes": 135413760,
+    "workloads": {
+      "position encode/decode": {
+        "operationsPerRun": 25600,
+        "p50Microseconds": 1.53125,
+        "p95Microseconds": 2.66640625
+      },
+      "chunk block-state set/get": {
+        "operationsPerRun": 25600,
+        "p50Microseconds": 0.5796875,
+        "p95Microseconds": 1.425390625
+      }
+    }
+  },
+  "runs": [
+    {
+      "peakRssBytes": 135413760,
+      "positionP95Microseconds": 2.66640625,
+      "chunkP95Microseconds": 1.2859375
+    },
+    {
+      "peakRssBytes": 135651328,
+      "positionP95Microseconds": 3.52890625,
+      "chunkP95Microseconds": 1.45546875
+    },
+    {
+      "peakRssBytes": 134987776,
+      "positionP95Microseconds": 2.2859375,
+      "chunkP95Microseconds": 1.425390625
+    }
+  ]
+}

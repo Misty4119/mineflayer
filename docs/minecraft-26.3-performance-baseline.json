@@ -1,0 +1,92 @@
+{
+  "purpose": "Repeated same-process-shape baseline comparing the 26.2 and 26.3 protocol/chunk hot paths after the 26.3 support changes.",
+  "environment": {
+    "os": "Windows 10.0.26100 x64",
+    "node": "v24.19.0",
+    "versionRuns": [
+      "26.2",
+      "26.3"
+    ],
+    "timestampUtc": "2026-09-19"
+  },
+  "method": {
+    "command": "npm run perf:baseline -- <version>",
+    "warmupBatches": 16,
+    "measuredBatches": 100,
+    "operationsPerBatch": 256,
+    "processRuns": 3,
+    "regressionRule": "Investigate a repeatable regression greater than 10% in p95 latency or peak RSS."
+  },
+  "baseline26_2": {
+    "peakRssBytes": 181088256,
+    "workloads": {
+      "position encode/decode": {
+        "p50Microseconds": 1.00703125,
+        "p95Microseconds": 2.20546875
+      },
+      "chunk block-state set/get": {
+        "p50Microseconds": 0.538671875,
+        "p95Microseconds": 0.966796875
+      }
+    },
+    "runs": [
+      {
+        "peakRssBytes": 179593216,
+        "positionP95Microseconds": 4.353125,
+        "chunkP95Microseconds": 1.505078125
+      },
+      {
+        "peakRssBytes": 182394880,
+        "positionP95Microseconds": 2.20546875,
+        "chunkP95Microseconds": 0.966796875
+      },
+      {
+        "peakRssBytes": 181088256,
+        "positionP95Microseconds": 2.0171875,
+        "chunkP95Microseconds": 0.7328125
+      }
+    ]
+  },
+  "baseline26_3": {
+    "peakRssBytes": 183934976,
+    "workloads": {
+      "position encode/decode": {
+        "p50Microseconds": 0.9500000000000064,
+        "p95Microseconds": 2.340625
+      },
+      "chunk block-state set/get": {
+        "p50Microseconds": 0.480859375,
+        "p95Microseconds": 0.91015625
+      }
+    },
+    "runs": [
+      {
+        "peakRssBytes": 183934976,
+        "positionP95Microseconds": 2.40234375,
+        "chunkP95Microseconds": 0.958984375
+      },
+      {
+        "peakRssBytes": 183853056,
+        "positionP95Microseconds": 2.340625,
+        "chunkP95Microseconds": 0.91015625
+      },
+      {
+        "peakRssBytes": 184172544,
+        "positionP95Microseconds": 2.004296875,
+        "chunkP95Microseconds": 0.748046875
+      }
+    ]
+  },
+  "comparison": {
+    "peakRssChangePercent": 1.57,
+    "workloads": {
+      "position encode/decode": {
+        "p95ChangePercent": 6.13
+      },
+      "chunk block-state set/get": {
+        "p95ChangePercent": -5.86
+      }
+    },
+    "result": "No repeatable regression exceeded 10%."
+  }
+}
