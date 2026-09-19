@@ -35,7 +35,7 @@ First time using Node.js? You may want to start with the [tutorial](tutorial.md)
 
 ## Installation
 
-First install Node.js >= 18 from [nodejs.org](https://nodejs.org/) then:
+First install Node.js >= 22 from [nodejs.org](https://nodejs.org/) then:
 
 ```bash
 npm install mineflayer
@@ -46,6 +46,19 @@ To update mineflayer (or any Node.js) package and its dependencies, use
 npm update
 ```
 
+## Repository guides and source-tree status
+
+This file is the canonical README. The root README.md is ignored and generated from this file by the prepublishOnly script.
+
+- [Agent instructions](https://github.com/Misty4119/mineflayer/blob/master/AGENTS.md)
+- [Repository context](https://github.com/Misty4119/mineflayer/blob/master/CONTEXT.md)
+- [Security policy](https://github.com/Misty4119/mineflayer/blob/master/SECURITY.md)
+- [Code of Conduct](https://github.com/Misty4119/mineflayer/blob/master/CODE_OF_CONDUCT.md)
+- [Contribution guide](CONTRIBUTING.md)
+- [26.2 research and limits](minecraft-26.2-research.md)
+- [26.3 research and limits](minecraft-26.3-research.md)
+
+The master source tree includes Java 26.2 and 26.3 compatibility work that is newer than the current published npm version. An ordinary npm install therefore does not reproduce this fork's 26.2/26.3 implementation. The validated development topology uses the adjacent node-minecraft-protocol, prismarine-chunk, prismarine-item, and prismarine-physics checkouts plus vendor/minecraft-data; see CONTEXT.md before attempting a cross-repository run.
 ## Documentation
 
 | link | description |
@@ -290,4 +303,4 @@ to run the block finder test for 1.18.1
 
 ## License
 
-[MIT](/LICENSE)
+[MIT](https://github.com/Misty4119/mineflayer/blob/master/LICENSE)
