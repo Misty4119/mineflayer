@@ -68,21 +68,21 @@ for (const overlayVersion of overlayVersions) {
 
 const featuresFile = path.join(basePackageRoot, 'minecraft-data', 'data', 'pc', 'common', 'features.json')
 const features = require(featuresFile)
-const addVersionFeature = (name, description) => {
+const addVersionFeature = (name, description, versions = overlayVersions) => {
   const feature = features.find(entry => entry.name === name)
   if (feature) {
-    for (const overlayVersion of overlayVersions) {
+    for (const overlayVersion of versions) {
       if (feature.versions && !feature.versions.includes(overlayVersion)) feature.versions.push(overlayVersion)
     }
     return
   }
-  features.push({ name, description, versions: [...overlayVersions] })
+  features.push({ name, description, versions: [...versions] })
 }
 
 addVersionFeature('sendsPlayerLoadedPacket', 'client sends a player_loaded packet after loading terrain or respawning')
 addVersionFeature('enchantmentsComponentIsFlat', 'the enchantments item component is a plain enchantment-to-level map')
-addVersionFeature('teamPacketUsesOptionalColor', 'the 26.2 teams packet uses display components, optional color, and a trailing flags byte')
-addVersionFeature('useEntityUsesSecondaryAction', 'the 26.2 use_entity packet names its sneak interaction flag usingSecondaryAction')
+addVersionFeature('teamPacketUsesOptionalColor', 'the 26.2 and 26.3 teams packet uses display components, optional color, and a trailing flags byte', ['26.2', '26.3'])
+addVersionFeature('useEntityUsesSecondaryAction', 'the 26.2 and 26.3 use_entity packet names its sneak interaction flag usingSecondaryAction', ['26.2', '26.3'])
 addVersionFeature('setCursorItemPacket', 'server sends authoritative cursor contents in set_cursor_item')
 addVersionFeature('customNameComponentIsPlainText', 'the custom_name item component is returned as a plain NBT string')
 addVersionFeature('loginSuccessIncludesSessionId', 'login success includes the server session UUID')

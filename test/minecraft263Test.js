@@ -3,6 +3,8 @@
 const assert = require('assert')
 const minecraftData = require('minecraft-data')
 const minecraftProtocol = require('minecraft-protocol')
+const registry = require('prismarine-registry')('26.3')
+const Particle = require('../lib/particle')(registry)
 const { latestSupportedVersion } = require('../lib/version')
 
 describe('Minecraft Java 26.3 support', function () {
@@ -17,6 +19,16 @@ describe('Minecraft Java 26.3 support', function () {
     assert.ok(data.itemsByName.white_cushion)
     assert.ok(data.biomesByName.dappled_forest)
     assert.ok(data.entitiesByName.player.metadataKeys.includes('pose'))
+  })
+
+  it('keeps packet feature gates aligned across 26.2 and 26.3', function () {
+    const data262 = minecraftData('26.2')
+    const data263 = minecraftData('26.3')
+
+    assert.strictEqual(data262.supportFeature('teamPacketUsesOptionalColor'), true)
+    assert.strictEqual(data263.supportFeature('teamPacketUsesOptionalColor'), true)
+    assert.strictEqual(data262.supportFeature('useEntityUsesSecondaryAction'), true)
+    assert.strictEqual(data263.supportFeature('useEntityUsesSecondaryAction'), true)
   })
 
   it('writes the 26.3 protocol number in the public handshake serializer', function () {
@@ -49,6 +61,18 @@ describe('Minecraft Java 26.3 support', function () {
     assert.strictEqual(metadataType[35], 'sniffer_state')
     assert.strictEqual(metadataType[36], 'armadillo_state')
     assert.strictEqual(metadataType[43], 'dye_color')
+
+    const slotTypes = data.protocol.types.SlotComponentType[1].mappings
+    assert.strictEqual(Object.keys(slotTypes).length, 122)
+    assert.strictEqual(slotTypes[40], 'attack_animation')
+    assert.strictEqual(slotTypes[43], 'block_transformer')
+    assert.strictEqual(slotTypes[121], 'cushion/color')
+
+    const swingFields = data.protocol.play.toClient.types.packet_swing_animation[1]
+    assert.deepStrictEqual(
+      swingFields.map(field => field.name),
+      ['entityId', 'hand', 'animationType', 'duration']
+    )
 
     const lightFields = data.protocol.play.toClient.types.packet_update_light[1]
     assert.deepStrictEqual(
@@ -122,5 +146,28 @@ describe('Minecraft Java 26.3 support', function () {
       yRot: 90,
       xRot: -10
     })
+  })
+
+  it('adapts the 26.3 particle speed fields to the public particle shape', function () {
+    const particle = Particle.fromNetwork({
+      particle: { type: 'angry_villager' },
+      x: 0.5,
+      y: 64,
+      z: -2,
+      offsetX: 5,
+      offsetY: 5,
+      offsetZ: 5,
+      xMaxSpeed: 0.5,
+      yMaxSpeed: 0.5,
+      zMaxSpeed: 0.5,
+      amount: 100,
+      longDistance: true,
+      randomizationType: 'default'
+    })
+
+    assert.strictEqual(particle.name, 'angry_villager')
+    assert.strictEqual(particle.position.x, 0.5)
+    assert.strictEqual(particle.movementSpeed, 0.5)
+    assert.strictEqual(particle.longDistanceRender, true)
   })
 })
