@@ -3940,35 +3940,35 @@
                 "5": "component",
                 "6": "optional_component",
                 "7": "item_stack",
-                "8": "block_state",
-                "9": "optional_block_state",
-                "10": "boolean",
-                "11": "particle",
-                "12": "particles",
-                "13": "rotations",
-                "14": "block_pos",
-                "15": "optional_block_pos",
-                "16": "direction",
-                "17": "optional_living_entity_reference",
-                "18": "optional_global_pos",
-                "19": "villager_data",
-                "20": "optional_unsigned_int",
-                "21": "pose",
-                "22": "cat_variant",
-                "23": "cat_sound_variant",
-                "24": "chicken_variant",
-                "25": "chicken_sound_variant",
-                "26": "cow_variant",
-                "27": "cow_sound_variant",
-                "28": "wolf_variant",
-                "29": "wolf_sound_variant",
-                "30": "frog_variant",
-                "31": "pig_variant",
-                "32": "pig_sound_variant",
-                "33": "zombie_nautilus_variant",
+                "8": "boolean",
+                "9": "rotations",
+                "10": "block_pos",
+                "11": "optional_block_pos",
+                "12": "direction",
+                "13": "optional_living_entity_reference",
+                "14": "block_state",
+                "15": "optional_block_state",
+                "16": "particle",
+                "17": "particles",
+                "18": "villager_data",
+                "19": "optional_unsigned_int",
+                "20": "pose",
+                "21": "cat_variant",
+                "22": "cat_sound_variant",
+                "23": "chicken_variant",
+                "24": "chicken_sound_variant",
+                "25": "cow_variant",
+                "26": "cow_sound_variant",
+                "27": "wolf_variant",
+                "28": "wolf_sound_variant",
+                "29": "frog_variant",
+                "30": "pig_variant",
+                "31": "pig_sound_variant",
+                "32": "zombie_nautilus_variant",
+                "33": "optional_global_pos",
                 "34": "painting_variant",
-                "35": "armadillo_state",
-                "36": "sniffer_state",
+                "35": "sniffer_state",
+                "36": "armadillo_state",
                 "37": "weathering_copper_golem_state",
                 "38": "copper_golem_state",
                 "39": "vector3",
@@ -7661,43 +7661,19 @@
             },
             {
               "name": "skyLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "blockLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "emptySkyLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "emptyBlockLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "skyLight",
@@ -8185,8 +8161,17 @@
               "type": "position"
             },
             {
-              "name": "isFrontText",
-              "type": "bool"
+              "name": "slot",
+              "type": [
+                "mapper",
+                {
+                  "type": "varint",
+                  "mappings": {
+                    "0": "back",
+                    "1": "front"
+                  }
+                }
+              ]
             }
           ]
         ],
@@ -11916,10 +11901,6 @@
               "type": "position"
             },
             {
-              "name": "isFrontText",
-              "type": "bool"
-            },
-            {
               "name": "text1",
               "type": "string"
             },
@@ -11934,6 +11915,19 @@
             {
               "name": "text4",
               "type": "string"
+            },
+            {
+              "name": "slot",
+              "type": [
+                "mapper",
+                {
+                  "type": "varint",
+                  "mappings": {
+                    "0": "back",
+                    "1": "front"
+                  }
+                }
+              ]
             }
           ]
         ],
@@ -12146,7 +12140,7 @@
                     "0x3c": "update_structure_block",
                     "0x3d": "set_test_block",
                     "0x3e": "update_sign",
-                    "0x3f": "arm_animation",
+                    "0x3f": "spectator_action",
                     "0x40": "spectate",
                     "0x41": "test_instance_block_action",
                     "0x42": "block_place",
@@ -12225,15 +12219,13 @@
                     "update_structure_block": "packet_update_structure_block",
                     "set_test_block": "packet_set_test_block",
                     "update_sign": "packet_update_sign",
-                    "spectate_entity": "packet_spectate_entity",
-                    "arm_animation": "packet_arm_animation",
+                    "spectator_action": "packet_spectator_action",
                     "spectate": "packet_spectate",
                     "test_instance_block_action": "packet_test_instance_block_action",
                     "block_place": "packet_block_place",
                     "use_item": "packet_use_item",
                     "custom_click_action": "packet_common_custom_click_action",
-                    "punch": "packet_punch",
-                    "spectator_action": "packet_spectator_action"
+                    "punch": "packet_punch"
                   }
                 }
               ]
