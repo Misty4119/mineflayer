@@ -1,0 +1,47 @@
+name: Sync labels
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const labels = require('./.github/labels.json')
+            const { owner, repo } = context.repo
+            const existing = await github.paginate(github.rest.issues.listLabelsForRepo, {
+              owner,
+              repo,
+              per_page: 100
+            })
+            const byName = new Map(existing.map(label => [label.name.toLowerCase(), label]))
+
+            for (const label of labels) {
+              const current = byName.get(label.name.toLowerCase())
+              if (!current) {
+                await github.rest.issues.createLabel({ owner, repo, ...label })
+                core.info(`Created label: ${label.name}`)
+              } else if (current.color !== label.color || current.description !== label.description) {
+                await github.rest.issues.updateLabel({
+                  owner,
+                  repo,
+                  name: current.name,
+                  new_name: label.name,
+                  color: label.color,
+                  description: label.description
+                })
+                core.info(`Updated label: ${label.name}`)
+              } else {
+                core.info(`Label already matches: ${label.name}`)
+              }
+            }

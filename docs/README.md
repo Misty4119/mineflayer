@@ -1,7 +1,7 @@
 # Mineflayer
 
 [![NPM version](https://img.shields.io/npm/v/mineflayer.svg?color=success&label=npm%20package&logo=npm)](https://www.npmjs.com/package/mineflayer)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/PrismarineJS/mineflayer/ci.yml.svg?label=CI&logo=github&logoColor=lightgrey)](https://github.com/PrismarineJS/mineflayer/actions?query=workflow%3A%22CI%22)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Misty4119/mineflayer/ci.yml.svg?label=CI&logo=github&logoColor=lightgrey)](https://github.com/Misty4119/mineflayer/actions?query=workflow%3A%22CI%22)
 [![Try it on gitpod](https://img.shields.io/static/v1.svg?label=try&message=on%20gitpod&color=brightgreen&logo=gitpod)](https://gitpod.io/#https://github.com/PrismarineJS/mineflayer)
 [![Open In Colab](https://img.shields.io/static/v1.svg?label=open&message=on%20colab&color=blue&logo=google-colab)](https://colab.research.google.com/github/PrismarineJS/mineflayer/blob/master/docs/mineflayer.ipynb)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/PrismarineJS)](https://github.com/sponsors/PrismarineJS)
@@ -17,7 +17,7 @@ First time using Node.js? You may want to start with the [tutorial](tutorial.md)
 
 ## Features
 
- * Supports Minecraft 1.8 to 26.3 (1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.20, 1.21, 1.21.9, 1.21.11, 26.1, 26.2, 26.3) <!--version-->
+ * Supports Minecraft 1.8 to 26.3 in this source tree (1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.20, 1.21, 1.21.9, 1.21.11, 26.1, 26.2, 26.3) <!--version-->
  * Entity knowledge and tracking.
  * Block knowledge. You can query the world around you. Milliseconds to find any block.
  * Physics and movement - handle all bounding boxes
@@ -58,7 +58,8 @@ This file is the canonical README. The root README.md is ignored and generated f
 - [26.2 research and limits](minecraft-26.2-research.md)
 - [26.3 research and limits](minecraft-26.3-research.md)
 
-The master source tree includes Java 26.2 and 26.3 compatibility work that is newer than the current published npm version. An ordinary npm install therefore does not reproduce this fork's 26.2/26.3 implementation. The validated development topology uses the adjacent node-minecraft-protocol, prismarine-chunk, prismarine-item, and prismarine-physics checkouts plus vendor/minecraft-data; see CONTEXT.md before attempting a cross-repository run.
+The master source tree includes Java 26.2 (protocol 776, data version 4903) and Java 26.3 (protocol 777, data version 5023) compatibility work. This work is newer than the published `mineflayer@4.39.0` package, so an ordinary npm install does not reproduce the source-tree implementation. The validated development topology uses the adjacent node-minecraft-protocol, prismarine-chunk, prismarine-item, and prismarine-physics checkouts plus vendor/minecraft-data; see CONTEXT.md before attempting a cross-repository run. Current test evidence is for offline/local server scenarios; it does not establish Microsoft online-authentication or third-party-server compatibility.
+
 ## Documentation
 
 | link | description |

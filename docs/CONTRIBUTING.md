@@ -6,13 +6,13 @@ That's why it is important to know the best ways to contribute to mineflayer.
 
 ## Issue organization
 
-We have 3 stage labels to try to organize issues:
+We use three stage labels to show how ready an issue is for implementation:
 
-* Stage 1: just created by someone new to the project, we don't know yet if it deserves an implementation / a fix
-* Stage 2: promising idea, but needs more thinking before implementation
-* Stage 3: idea is precisely specified, only coding is left to do
+* `Stage1`: newly reported issue waiting for triage
+* `Stage2`: accepted issue or proposal that needs design work
+* `Stage3`: specified work that is ready to implement
 
-Links like https://github.com/PrismarineJS/mineflayer/issues?q=is%3Aopen+is%3Aissue+-label%3AStage1 can be used to filter out stage 1 if you're looking for things that are ready for contribution
+See [issues that are open and not in Stage1](https://github.com/Misty4119/mineflayer/issues?q=is%3Aopen+is%3Aissue+-label%3AStage1) when looking for work that has been triaged.
 
 ## Creating tests
 Mineflayer has two kind of tests :
@@ -30,12 +30,26 @@ You can run tests for Different Minecraft versions using the `-g` flag with npm 
 # Run all tests in all supported versions
 npm run test
 
+# Run internal protocol/plugin tests
+npm run mocha_test -- test/internalTest.js
+
+# Run the focused Java 26.3 protocol 777 suites
+npm run mocha_test -- test/minecraft263Test.js test/minecraft263IntegrationTest.js
+
+# Run the offline Vanilla Java 26.3 integration suite
+npm run mocha_test -- test/externalTest.js --grep 'mineflayer_external 26.3v'
+
+# Check the Java 26.2 inventory/protocol 776 regression
+npm run mocha_test -- test/externalTest.js --grep 'mineflayer_external 26.2v.*playerInventory'
+
 # Run a specific test in Minecraft 1.20.4
 npm run mocha_test -- -g "mineflayer_external 1.20.4v.*exampleBee"
 
 # Run all tests in just version 1.20.4
 npm run mocha_test -- -g "mineflayer_external 1.20.4v"
 ```
+
+The external tests require a compatible local Vanilla server. The repository's Java 26.3 evidence covers an offline server; it does not establish Microsoft online authentication or compatibility with Paper, Spigot, proxies, or other third-party servers. See [the 26.3 research notes](minecraft-26.3-research.md) for the validated scope.
 
 
 ### Creating an external test

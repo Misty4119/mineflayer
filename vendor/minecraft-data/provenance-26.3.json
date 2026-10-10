@@ -8,5 +8,23 @@
   "generator": "net.minecraft.data.Main --reports",
   "serverJar": "server_jars/minecraft_server.26.3.jar",
   "serverJarSha256": "D052F14D7A173734FBA553711E5B570162E2F2A313267EE31A21B975A679BE64",
-  "generatedAt": "2026-09-19"
+  "generatedAt": "2026-09-19",
+  "protocolSchemaOverlay": {
+    "sourceRepository": "../minecraft-data",
+    "sourceBranch": "linco/minecraft-26-3-support",
+    "sourceCommit": "6a62cd263b6fe6341d0a3067f05fc25154401ebc",
+    "sourceWorkingTreeModified": true,
+    "sourceFile": "data/pc/26.3/proto.yml",
+    "generator": "minecraft-data/tools/js/compileProtocol.js with protodef-yaml 1.5.0; npm run build -- pc 26.3",
+    "protocolJsonSha256": "102176D85C98E4721E12CE07D2D9AE2BCE61091008D0AB712E9C67B2A7D326F6",
+    "updatedAt": "2026-10-10",
+    "serverJarInnerSha256": "A362163EEC5D1612D520772BC16E5B39C09E3B234FDC045F56BF544284EE8AE6",
+    "corrections": [
+      "damage_resistant holder set",
+      "provides_banner_patterns holder set",
+      "pot_decorations optional back/left/right/front item stacks",
+      "teleport_randomly directionalParticles field",
+      "PlayerSkinPatch.model boolean flag"
+    ]
+  }
 }

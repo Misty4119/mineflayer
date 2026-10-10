@@ -84,6 +84,10 @@
       - [Particle.longDistanceRender](#particlelongdistancerender)
       - [Particle.count](#particlecount)
       - [Particle.movementSpeed](#particlemovementspeed)
+      - [Particle.maxSpeed](#particlemaxspeed)
+      - [Particle.randomizationType](#particlerandomizationtype)
+      - [Particle.alwaysShow](#particlealwaysshow)
+      - [Particle.data](#particledata)
   - [Bot](#bot)
     - [mineflayer.createBot(options)](#mineflayercreatebotoptions)
     - [Properties](#properties)
@@ -357,6 +361,7 @@
       - [bot.creative.stopFlying()](#botcreativestopflying)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 # API
 
@@ -794,7 +799,23 @@ Amount of particles created
 
 #### Particle.movementSpeed
 
-Particle speed in a random direction
+Legacy scalar particle speed. In Minecraft 26.3 this preserves the packet's X-axis maximum speed; read `maxSpeed` for all three axis values.
+
+#### Particle.maxSpeed
+
+Axis-specific maximum particle speed. In Minecraft 26.3 this preserves the packet's X, Y, and Z maximum speeds. Older packets provide one scalar speed, which is represented on all three axes. `movementSpeed` remains available as the legacy scalar value.
+
+#### Particle.randomizationType
+
+Minecraft 26.3 particle speed randomization mode: `default`, `alternative`, or `alternative_with_speed`. It is `undefined` on packets that do not provide this field.
+
+#### Particle.alwaysShow
+
+Preserves the Minecraft 26.3 particle packet's `alwaysShow` flag. It is `false` when the packet does not provide the flag.
+
+#### Particle.data
+
+The particle-specific data payload, when the protocol packet includes one. Its shape depends on the particle type and Minecraft version.
 
 ## Bot
 

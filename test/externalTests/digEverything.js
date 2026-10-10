@@ -135,7 +135,7 @@ async function digSomething (blockId, bot) {
   const needsEggSand = block.name === 'turtle_egg'
   const needsLowLight = ['brown_mushroom', 'red_mushroom'].includes(block.name)
   const needsFarmlandCover = block.name === 'farmland'
-  const needsWallAttachment = ['ladder', 'vine', 'glow_lichen', 'resin_clump', 'tripwire_hook'].includes(block.name)
+  const needsWallAttachment = ['ladder', 'vine', 'glow_lichen', 'resin_clump', 'tripwire_hook', 'shelf_mushroom'].includes(block.name)
   const needsCeilingAttachment = block.name.endsWith('_hanging_sign') || ['weeping_vines', 'spore_blossom', 'hanging_roots', 'pale_hanging_moss'].includes(block.name)
   const needsServerPlacement = block.name.startsWith('infested_') ||
      ['resin_bricks', 'chiseled_resin_bricks', 'smooth_basalt', 'wheat', 'farmland', 'sugar_cane', 'brown_mushroom_block', 'red_mushroom_block', 'mushroom_stem'].includes(block.name)
