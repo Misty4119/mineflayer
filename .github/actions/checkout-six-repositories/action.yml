@@ -1,0 +1,40 @@
+name: Checkout pinned Minecraft protocol workspace
+description: Check out the sibling source repositories required by Mineflayer's file dependencies.
+runs:
+  using: composite
+  steps:
+    - name: Checkout node-minecraft-protocol
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: Misty4119/node-minecraft-protocol
+        ref: cc1bfca769d36e90f8941138c1f63144e55d3403
+        path: node-minecraft-protocol
+        persist-credentials: false
+    - name: Checkout minecraft-data source
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: Misty4119/minecraft-data
+        ref: 1d37505b338710f2f347aa00efaa48a054754b19
+        path: minecraft-data
+        persist-credentials: false
+    - name: Checkout prismarine-chunk
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: Misty4119/prismarine-chunk
+        ref: 23149f443d08aa15c4d4ddc868dfd3536c7b6110
+        path: prismarine-chunk
+        persist-credentials: false
+    - name: Checkout prismarine-item
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: Misty4119/prismarine-item
+        ref: 9c3c7ab88aab28072a0222b9bfa599e516fcbaf9
+        path: prismarine-item
+        persist-credentials: false
+    - name: Checkout prismarine-physics
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: Misty4119/prismarine-physics
+        ref: 0e9d8c5f0876fcfab37443aa39de58c26ca319fe
+        path: prismarine-physics
+        persist-credentials: false

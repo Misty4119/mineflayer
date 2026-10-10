@@ -1,6 +1,6 @@
 # Contributing to Mineflayer Tests as an LLM
 
-This guide explains how to add and modify tests in Mineflayer, based on the experience of working with the time-related functionality. It provides a structured approach for LLMs to help with test development and debugging.
+This guide explains how to add and modify Mineflayer tests. Use the test tier that matches the behavior being changed, preserve older-version coverage, and report exactly which server and authentication mode were exercised.
 
 ## Test Structure
 
@@ -72,9 +72,32 @@ const timeTests = [
 npm run mocha_test -- -g "mineflayer_external 1.20.4v.*time"
 ```
 
+### Current protocol checks
+
+Java 26.2 uses protocol 776 and data version 4903. Java 26.3 uses protocol 777 and data version 5023. The focused 26.3 suites exercise the current source-tree implementation; `npm install mineflayer` alone does not reproduce this fork's local sibling dependencies and vendored data.
+
+```bash
+# Lint the source and Markdown
+npm run lint
+
+# Deterministic internal protocol/plugin tests
+npm run mocha_test -- test/internalTest.js
+
+# Focused protocol 777 tests
+npm run mocha_test -- test/minecraft263Test.js test/minecraft263IntegrationTest.js
+
+# Offline Vanilla 26.3 integration suite (requires the matching local server)
+npm run mocha_test -- test/externalTest.js --grep 'mineflayer_external 26.3v'
+
+# Protocol 776 inventory regression
+npm run mocha_test -- test/externalTest.js --grep 'mineflayer_external 26.2v.*playerInventory'
+```
+
+Offline server results do not establish Microsoft online-authentication, proxy, or third-party-server compatibility. For a cross-repository run, first read `CONTEXT.md` and record the exact sibling repository SHAs and `vendor/minecraft-data` provenance.
+
 ### Version-Specific Testing
 - Test against multiple Minecraft versions
-- Common versions to test: 1.14.4, 1.20.4, 1.21.3
+- Common versions to test: 1.14.4, 1.20.4, 1.21.3, 26.2, 26.3
 - Example:
 ```bash
 # Test for 1.14.4

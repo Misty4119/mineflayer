@@ -876,23 +876,33 @@ export class BossBar {
 }
 
 export class Particle {
-  id: number
+  id: number | string
   position: Vec3
   offset: Vec3
   count: number
   movementSpeed: number
   longDistanceRender: boolean
+  maxSpeed: Vec3
+  randomizationType: ParticleRandomizationType | undefined
+  alwaysShow: boolean
+  data: unknown
   static fromNetwork(packet: Object): Particle
 
   constructor(
-    id: number,
+    id: number | string,
     position: Vec3,
     offset: Vec3,
     count?: number,
     movementSpeed?: number,
-    longDistanceRender?: boolean
+    longDistanceRender?: boolean,
+    maxSpeed?: Vec3,
+    randomizationType?: ParticleRandomizationType,
+    alwaysShow?: boolean,
+    data?: unknown
   );
 }
+
+export type ParticleRandomizationType = 'default' | 'alternative' | 'alternative_with_speed'
 
 export let testedVersions: string[]
 export let latestSupportedVersion: string

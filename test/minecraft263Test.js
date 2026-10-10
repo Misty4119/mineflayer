@@ -3,7 +3,9 @@
 const assert = require('assert')
 const minecraftData = require('minecraft-data')
 const minecraftProtocol = require('minecraft-protocol')
+const { Vec3 } = require('vec3')
 const registry = require('prismarine-registry')('26.3')
+const digEverything = require('./externalTests/digEverything')('26.3')
 const Particle = require('../lib/particle')(registry)
 const { latestSupportedVersion } = require('../lib/version')
 
@@ -19,6 +21,20 @@ describe('Minecraft Java 26.3 support', function () {
     assert.ok(data.itemsByName.white_cushion)
     assert.ok(data.biomesByName.dappled_forest)
     assert.ok(data.entitiesByName.player.metadataKeys.includes('pose'))
+  })
+
+  it('keeps the exhaustive dig matrix aligned with item-backed blocks', function () {
+    const blockNames = Object.keys(digEverything)
+
+    assert.ok(blockNames.length > 1000)
+    assert.ok(blockNames.includes('poplar_log'))
+    assert.ok(blockNames.includes('raw_iron_block'))
+    assert.ok(!blockNames.includes('water'))
+    assert.ok(!blockNames.includes('lava'))
+    for (const blockName of blockNames) {
+      assert.ok(registry.blocksByName[blockName], `${blockName} must exist in the block registry`)
+      assert.ok(registry.itemsByName[blockName], `${blockName} must have a matching item`)
+    }
   })
 
   it('keeps packet feature gates aligned across 26.2 and 26.3', function () {
@@ -78,6 +94,31 @@ describe('Minecraft Java 26.3 support', function () {
     assert.deepStrictEqual(
       lightFields.slice(2, 6).map(field => field.type),
       ['ByteArray', 'ByteArray', 'ByteArray', 'ByteArray']
+    )
+  })
+
+  it('loads official 26.3 item-component wire shapes through the vendored registry', function () {
+    const data = minecraftData('26.3')
+    const slotFields = data.protocol.types.SlotComponent[1]
+      .find(field => field.name === 'data').type[1].fields
+
+    assert.strictEqual(slotFields.damage_resistant, 'IDSet')
+    assert.strictEqual(slotFields.provides_banner_patterns, 'IDSet')
+    assert.deepStrictEqual(
+      slotFields.pot_decorations[1].map(({ name, type }) => [name, type]),
+      [
+        ['back', ['option', 'ItemStackTemplate']],
+        ['left', ['option', 'ItemStackTemplate']],
+        ['right', ['option', 'ItemStackTemplate']],
+        ['front', ['option', 'ItemStackTemplate']]
+      ]
+    )
+
+    const effectFields = data.protocol.types.ItemConsumeEffect[1]
+    const variants = effectFields.find(({ anon }) => anon).type[1].fields
+    assert.deepStrictEqual(
+      variants.teleport_randomly[1].map(({ name, type }) => [name, type]),
+      [['diameter', 'f32'], ['directionalParticles', 'bool']]
     )
   })
 
@@ -148,26 +189,54 @@ describe('Minecraft Java 26.3 support', function () {
     })
   })
 
-  it('adapts the 26.3 particle speed fields to the public particle shape', function () {
+  it('preserves the 26.3 particle speed vector, randomization, visibility, and payload', function () {
+    const particleData = registry.blocksByName.stone.id
     const particle = Particle.fromNetwork({
-      particle: { type: 'angry_villager' },
+      particle: { type: 'block', data: particleData },
       x: 0.5,
       y: 64,
       z: -2,
       offsetX: 5,
       offsetY: 5,
       offsetZ: 5,
-      xMaxSpeed: 0.5,
-      yMaxSpeed: 0.5,
-      zMaxSpeed: 0.5,
+      xMaxSpeed: 0.125,
+      yMaxSpeed: 0.25,
+      zMaxSpeed: 0.75,
       amount: 100,
       longDistance: true,
-      randomizationType: 'default'
+      alwaysShow: true,
+      randomizationType: 'alternative_with_speed'
     })
 
-    assert.strictEqual(particle.name, 'angry_villager')
+    assert.strictEqual(particle.name, 'block')
     assert.strictEqual(particle.position.x, 0.5)
-    assert.strictEqual(particle.movementSpeed, 0.5)
+    assert.strictEqual(particle.movementSpeed, 0.125)
     assert.strictEqual(particle.longDistanceRender, true)
+    assert.deepStrictEqual(particle.maxSpeed, new Vec3(0.125, 0.25, 0.75))
+    assert.strictEqual(particle.randomizationType, 'alternative_with_speed')
+    assert.strictEqual(particle.alwaysShow, true)
+    assert.strictEqual(particle.data, particleData)
+  })
+
+  it('keeps the legacy scalar particle speed compatible with the axis vector', function () {
+    const registry262 = require('prismarine-registry')('26.2')
+    const Particle262 = require('../lib/particle')(registry262)
+    const particle = Particle262.fromNetwork({
+      particle: { type: 'angry_villager' },
+      x: 0,
+      y: 0,
+      z: 0,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      velocityOffset: 0.5,
+      amount: 1,
+      longDistance: false
+    })
+
+    assert.strictEqual(particle.movementSpeed, 0.5)
+    assert.deepStrictEqual(particle.maxSpeed, new Vec3(0.5, 0.5, 0.5))
+    assert.strictEqual(particle.randomizationType, undefined)
+    assert.strictEqual(particle.alwaysShow, false)
   })
 })

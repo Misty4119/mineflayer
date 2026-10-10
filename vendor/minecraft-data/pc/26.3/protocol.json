@@ -876,7 +876,7 @@
                     }
                   ]
                 ],
-                "damage_resistant": "string",
+                "damage_resistant": "IDSet",
                 "tool": [
                   "container",
                   [
@@ -1505,7 +1505,7 @@
                     }
                   ]
                 ],
-                "provides_banner_patterns": "string",
+                "provides_banner_patterns": "IDSet",
                 "recipes": "anonymousNbt",
                 "lodestone_tracker": [
                   "container",
@@ -1565,13 +1565,31 @@
                   "container",
                   [
                     {
-                      "name": "decorations",
+                      "name": "back",
                       "type": [
-                        "array",
-                        {
-                          "countType": "varint",
-                          "type": "varint"
-                        }
+                        "option",
+                        "ItemStackTemplate"
+                      ]
+                    },
+                    {
+                      "name": "left",
+                      "type": [
+                        "option",
+                        "ItemStackTemplate"
+                      ]
+                    },
+                    {
+                      "name": "right",
+                      "type": [
+                        "option",
+                        "ItemStackTemplate"
+                      ]
+                    },
+                    {
+                      "name": "front",
+                      "type": [
+                        "option",
+                        "ItemStackTemplate"
                       ]
                     }
                   ]
@@ -1633,6 +1651,10 @@
                           "type": [
                             "container",
                             [
+                              {
+                                "name": "entityType",
+                                "type": "varint"
+                              },
                               {
                                 "name": "nbtData",
                                 "type": "anonymousNbt"
@@ -1951,6 +1973,55 @@
         "type": "SlotComponent"
       }
     ],
+    "DataComponentPredicateType": [
+      "mapper",
+      {
+        "type": "varint",
+        "mappings": {
+          "0": "damage",
+          "1": "enchantments",
+          "2": "stored_enchantments",
+          "3": "potion_contents",
+          "4": "custom_data",
+          "5": "container",
+          "6": "bundle_contents",
+          "7": "firework_explosion",
+          "8": "fireworks",
+          "9": "writable_book_content",
+          "10": "written_book_content",
+          "11": "attribute_modifiers",
+          "12": "trim",
+          "13": "jukebox_playable",
+          "14": "villager/variant"
+        }
+      }
+    ],
+    "PartialComponentMatcher": [
+      "container",
+      [
+        {
+          "name": "isPredicate",
+          "type": "bool"
+        },
+        {
+          "name": "type",
+          "type": [
+            "switch",
+            {
+              "compareTo": "isPredicate",
+              "fields": {
+                "true": "DataComponentPredicateType",
+                "false": "SlotComponentType"
+              }
+            }
+          ]
+        },
+        {
+          "name": "data",
+          "type": "anonymousNbt"
+        }
+      ]
+    ],
     "DataComponentMatchers": [
       "container",
       [
@@ -1964,7 +2035,7 @@
             "array",
             {
               "countType": "varint",
-              "type": "varint"
+              "type": "PartialComponentMatcher"
             }
           ]
         }
@@ -2105,6 +2176,10 @@
                     {
                       "name": "diameter",
                       "type": "f32"
+                    },
+                    {
+                      "name": "directionalParticles",
+                      "type": "bool"
                     }
                   ]
                 ],
@@ -4399,16 +4474,7 @@
           "name": "model",
           "type": [
             "option",
-            [
-              "mapper",
-              {
-                "type": "varint",
-                "mappings": {
-                  "0": "wide",
-                  "1": "slim"
-                }
-              }
-            ]
+            "bool"
           ]
         }
       ]

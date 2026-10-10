@@ -6,6 +6,9 @@ on:
       - master
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
@@ -15,12 +18,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        path: mineflayer-master
+        persist-credentials: false
+    - uses: ./mineflayer-master/.github/actions/checkout-six-repositories
     - name: Use Node.js 24.x
-      uses: actions/setup-node@v7
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
       with:
         node-version: 24
     - run: npm ci && npm run lint
+      working-directory: mineflayer-master
   
   PrepareSupportedVersions:
     runs-on: ubuntu-latest
@@ -28,15 +36,18 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        path: mineflayer-master
+        persist-credentials: false
     - name: Use Node.js 24.x
-      uses: actions/setup-node@v7
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
       with:
         node-version: 24
     - id: set-matrix
       run: |
         node -e "
-          const v = require('./lib/version').testedVersions;
+          const v = require('./mineflayer-master/lib/version').testedVersions;
           const groups = [];
           const SIZE = 4;
           for (let i = 0; i < v.length; i += SIZE) {
@@ -49,18 +60,25 @@ jobs:
     needs: PrepareSupportedVersions
     runs-on: ubuntu-latest
     name: MC ${{ matrix.versions }}
+    defaults:
+      run:
+        working-directory: mineflayer-master
     strategy:
       matrix: ${{ fromJson(needs.PrepareSupportedVersions.outputs.matrix) }}
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: mineflayer-master
+          persist-credentials: false
+      - uses: ./mineflayer-master/.github/actions/checkout-six-repositories
       - name: Use Node.js 24.x
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
       - name: Setup Java JDK
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
         with:
           distribution: temurin
           java-version: 25
@@ -70,9 +88,9 @@ jobs:
       # Per-test durations from the last master run of this version group, so a PR gets a
       # comment listing tests it made more than 1.5x slower (test/common/compareDurations.js).
       - name: Restore duration baseline
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          path: durations
+          path: mineflayer-master/durations
           key: durations-${{ strategy.job-index }}-${{ github.sha }}
           restore-keys: durations-${{ strategy.job-index }}-
       - run: |
@@ -119,6 +137,10 @@ jobs:
           done
           exit $exit_code
 
+      - name: Run 26.3-specific protocol suites
+        if: contains(matrix.versions, '26.3')
+        run: npm run mocha_test -- --retries 3 test/minecraft263Test.js test/minecraft263IntegrationTest.js
+
       - name: Compare test durations against master
         run: |
           mkdir -p slower
@@ -129,22 +151,22 @@ jobs:
       # duration-comment.yml from this artifact instead of from here.
       - name: Upload slower tests for the PR comment
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: slower-${{ strategy.job-index }}
-          path: slower
+          path: mineflayer-master/slower
 
       - name: Save duration baseline
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          path: durations
+          path: mineflayer-master/durations
           key: durations-${{ strategy.job-index }}-${{ github.sha }}
 
       - name: Upload failed versions' logs and traces
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: failing-versions-${{ strategy.job-index }}
-          path: artifacts/
+          path: mineflayer-master/artifacts/
           retention-days: 7

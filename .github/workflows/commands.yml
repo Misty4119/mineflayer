@@ -6,14 +6,19 @@ on:
   pull_request:         # Handle renamed PRs
     types: [edited]
 
+permissions:
+  contents: read
+
 jobs:
   comment-trigger:
     runs-on: ubuntu-latest
     steps:
     - name: Check out repository
-      uses: actions/checkout@v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Run command handlers
-      uses: PrismarineJS/prismarine-repo-actions@master
+      uses: PrismarineJS/prismarine-repo-actions@8595996654fa9aae9156a8ba6377fa1408f8f602 # immutable master snapshot
       with:
         # NOTE: You must specify a Personal Access Token (PAT) with repo access here. While you can use the default GITHUB_TOKEN, actions taken with it will not trigger other actions, so if you have a CI workflow, commits created by this action will not trigger it.
         token: ${{ secrets.PAT_PASSWORD }}
